@@ -1,8 +1,13 @@
-
 const express = require("express");
 const Blog = require("../models/Blog");
 
 const router = express.Router();
+
+const formatBlog = (blog) => ({
+  id: blog._id.toString(),
+  title: blog.title,
+  content: blog.content,
+});
 
 router.post("/", async (req, res) => {
   const { title, content } = req.body;
@@ -10,7 +15,7 @@ router.post("/", async (req, res) => {
   try {
     const newBlog = new Blog({ title, content });
     await newBlog.save();
-    res.status(201).json(newBlog);
+    res.status(201).json(formatBlog(newBlog));
   } catch (err) {
     res.status(400).json({ error: "Error creating blog" });
   }
@@ -19,7 +24,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const blogs = await Blog.find();
-    res.status(200).json(blogs);
+    res.status(200).json(blogs.map(formatBlog));
   } catch (err) {
     res.status(400).json({ error: "Error fetching blogs" });
   }
@@ -27,33 +32,39 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  
+
   try {
     const blog = await Blog.findById(id);
     if (!blog) {
       return res.status(404).json({ error: "Blog not found" });
     }
-    res.status(200).json(blog);
+    res.status(200).json(formatBlog(blog));
   } catch (err) {
     res.status(400).json({ error: "Error fetching blog" });
   }
 });
 
+// Update blog
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
 
   try {
-    const updatedBlog = await Blog.findByIdAndUpdate(id, { title, content }, { new: true });
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      id,
+      { title, content },
+      { new: true }
+    );
     if (!updatedBlog) {
       return res.status(404).json({ error: "Blog not found" });
     }
-    res.status(200).json(updatedBlog);
+    res.status(200).json(formatBlog(updatedBlog));
   } catch (err) {
     res.status(400).json({ error: "Error updating blog" });
   }
 });
 
+// Delete blog
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
