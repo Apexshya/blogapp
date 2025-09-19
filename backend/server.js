@@ -9,8 +9,10 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:3000",
+   "http://localhost:3000",
   "https://blogapp-one-phi.vercel.app", 
+  "https://blogapp-one-phi.vercel.app/", 
+  "https://blogapp-unqo.vercel.app" 
 ];
 
 app.use(
