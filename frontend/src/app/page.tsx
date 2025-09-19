@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import BlogForm from "../components/BlogForm";
 import BlogList from "../components/BlogList";
 
@@ -12,7 +12,7 @@ interface Blog {
 }
 
 export default function Home() {
-  const api = process.env.NEXT_PUBLIC_API_URL || ""; 
+  const api = process.env.NEXT_PUBLIC_API_URL || "";
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
@@ -23,21 +23,25 @@ export default function Home() {
     const fetchBlogs = async () => {
       try {
         setErrorMessage(null);
-        const res = await axios.get(`${api}/api/blogs`, {
+        const res = await axios.get<Blog[]>(`${api}/api/blogs`, {
           timeout: 10000,
         });
         setBlogs(res.data);
-      } catch (err: any) {
-        console.error("Error fetching blogs:", err);
-        if (axios.isAxiosError(err)) {
-          if (err.response) {
+      } catch (err) {
+        const error = err as AxiosError;
+        console.error("Error fetching blogs:", error);
+        if (axios.isAxiosError(error)) {
+          if (error.response) {
             setErrorMessage(
-              `Error ${err.response.status}: ${err.response.data?.error || err.response.statusText}`
+              `Error ${error.response.status}: ${
+                (error.response.data as { error?: string })?.error ||
+                error.response.statusText
+              }`
             );
-          } else if (err.request) {
+          } else if (error.request) {
             setErrorMessage("No response from backend. It might be down.");
           } else {
-            setErrorMessage(err.message);
+            setErrorMessage(error.message);
           }
         } else {
           setErrorMessage("Unexpected error occurred.");
@@ -51,13 +55,14 @@ export default function Home() {
   const handleCreateBlog = async (title: string, content: string) => {
     try {
       setErrorMessage(null);
-      const res = await axios.post(`${api}/api/blogs`, { title, content });
-      setBlogs(prev => [...prev, res.data]);
+      const res = await axios.post<Blog>(`${api}/api/blogs`, { title, content });
+      setBlogs((prev) => [...prev, res.data]);
       setIsCreateModalOpen(false);
-    } catch (err: any) {
-      console.error("Error creating blog:", err);
-      if (axios.isAxiosError(err)) {
-        setErrorMessage(err.response?.data?.error || "Error creating blog");
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Error creating blog:", error);
+      if (axios.isAxiosError(error)) {
+        setErrorMessage((error.response?.data as { error?: string })?.error || "Error creating blog");
       } else {
         setErrorMessage("Unexpected error creating blog");
       }
@@ -68,11 +73,12 @@ export default function Home() {
     try {
       setErrorMessage(null);
       await axios.delete(`${api}/api/blogs/${id}`);
-      setBlogs(prev => prev.filter(blog => blog.id !== id));
-    } catch (err: any) {
-      console.error("Error deleting blog:", err);
-      if (axios.isAxiosError(err)) {
-        setErrorMessage(err.response?.data?.error || "Error deleting blog");
+      setBlogs((prev) => prev.filter((blog) => blog.id !== id));
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Error deleting blog:", error);
+      if (axios.isAxiosError(error)) {
+        setErrorMessage((error.response?.data as { error?: string })?.error || "Error deleting blog");
       } else {
         setErrorMessage("Unexpected error deleting blog");
       }
@@ -86,18 +92,19 @@ export default function Home() {
   ) => {
     try {
       setErrorMessage(null);
-      const res = await axios.put(`${api}/api/blogs/${id}`, {
+      const res = await axios.put<Blog>(`${api}/api/blogs/${id}`, {
         title: updatedTitle,
         content: updatedContent,
       });
-      setBlogs(prev =>
-        prev.map(blog => (blog.id === id ? res.data : blog))
+      setBlogs((prev) =>
+        prev.map((blog) => (blog.id === id ? res.data : blog))
       );
       setEditingBlog(null);
-    } catch (err: any) {
-      console.error("Error updating blog:", err);
-      if (axios.isAxiosError(err)) {
-        setErrorMessage(err.response?.data?.error || "Error updating blog");
+    } catch (err) {
+      const error = err as AxiosError;
+      console.error("Error updating blog:", error);
+      if (axios.isAxiosError(error)) {
+        setErrorMessage((error.response?.data as { error?: string })?.error || "Error updating blog");
       } else {
         setErrorMessage("Unexpected error updating blog");
       }
@@ -140,14 +147,14 @@ export default function Home() {
               <input
                 type="text"
                 value={editingBlog.title}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setEditingBlog({ ...editingBlog, title: e.target.value })
                 }
                 className="w-full p-3 mb-4 border border-gray-300 rounded-md"
               />
               <textarea
                 value={editingBlog.content}
-                onChange={(e) =>
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                   setEditingBlog({ ...editingBlog, content: e.target.value })
                 }
                 className="w-full p-3 mb-4 border border-gray-300 rounded-md"
