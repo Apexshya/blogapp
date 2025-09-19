@@ -14,16 +14,24 @@ interface BlogCardProps {
 
 const BlogCard: React.FC<BlogCardProps> = ({ blog, onDelete, onEdit }) => {
   return (
-    <div className="p-4 border rounded-lg shadow-lg">
-      <h3 className="text-xl font-semibold">{blog.title}</h3>
-      <p>{blog.content}</p>
+    <div className="p-6 border border-gray-300 rounded-xl bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">{blog.title}</h3>
+      <p className="text-gray-700 mb-6">{blog.content}</p>
 
-      <button onClick={() => onEdit(blog.id, blog.title, blog.content)} className="mr-4 py-2 px-4 bg-gray-400 text-white rounded">
-        Edit
-      </button>
-      <button onClick={() => onDelete(blog.id)} className="py-2 px-4 bg-red-600 text-white rounded">
-        Delete
-      </button>
+      <div className="flex space-x-4">
+        <button
+          onClick={() => onEdit(blog.id, blog.title, blog.content)}
+          className="py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+        >
+           Edit
+        </button>
+        <button
+          onClick={() => onDelete(blog.id)}
+          className="py-2 px-6 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+        >
+           Delete
+        </button>
+      </div>
     </div>
   );
 };
