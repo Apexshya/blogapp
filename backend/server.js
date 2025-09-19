@@ -8,10 +8,32 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000" })); 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://blogapp-one-phi.vercel.app", 
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
+
 app.use(express.json());
 
 app.use("/api/blogs", blogRoutes);
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ message: "Server is running!" });
+});
 
 const connectDB = async () => {
   try {
@@ -20,17 +42,6 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
     console.log("MongoDB Connected Successfully");
-
-    const dbs = await mongoose.connection.db.admin().listDatabases();
-    const dbExists = dbs.databases.some((db) => db.name === "blogapp");
-
-    if (dbExists) {
-      console.log("Database 'blogapp' found");
-    } else {
-      console.log(
-        "Database 'blogapp' will be created automatically on first operation"
-      );
-    }
   } catch (error) {
     console.error("MongoDB Connection Error:", error);
     process.exit(1);
@@ -49,8 +60,13 @@ mongoose.connection.on("disconnected", () => {
   console.log("Mongoose disconnected");
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = app;
+
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  });
+}
