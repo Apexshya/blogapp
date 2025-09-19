@@ -1,5 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import axios from "axios";
 import BlogForm from "../components/BlogForm";
 import BlogList from "../components/BlogList";
 
@@ -18,13 +20,8 @@ export default function Home() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/blogs", {
-          method: "GET",
-          cache: "no-store",
-        });
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        setBlogs(data);
+        const res = await axios.get("http://localhost:5000/api/blogs");
+        setBlogs(res.data);
       } catch (err) {
         console.error("Error fetching blogs:", err);
       }
@@ -35,17 +32,12 @@ export default function Home() {
 
   // Create blog
   const handleCreateBlog = async (title: string, content: string) => {
-    const newBlog = { title, content };
     try {
-      const res = await fetch("http://localhost:5000/api/blogs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newBlog),
-        cache: "no-store",
+      const res = await axios.post("http://localhost:5000/api/blogs", {
+        title,
+        content,
       });
-      if (!res.ok) throw new Error("Failed to create blog");
-      const data = await res.json();
-      setBlogs((prevBlogs) => [...prevBlogs, data]);
+      setBlogs((prevBlogs) => [...prevBlogs, res.data]);
       setIsCreateModalOpen(false);
     } catch (err) {
       console.error("Error creating blog:", err);
@@ -55,15 +47,8 @@ export default function Home() {
   // Delete blog
   const handleDeleteBlog = async (id: string) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/blogs/${id}`, {
-        method: "DELETE",
-        cache: "no-store",
-      });
-      if (res.ok) {
-        setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
-      } else {
-        console.error("Failed to delete blog");
-      }
+      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
     } catch (err) {
       console.error("Error deleting blog:", err);
     }
@@ -75,18 +60,13 @@ export default function Home() {
     updatedTitle: string,
     updatedContent: string
   ) => {
-    const updatedBlog = { title: updatedTitle, content: updatedContent };
     try {
-      const res = await fetch(`http://localhost:5000/api/blogs/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedBlog),
-        cache: "no-store",
+      const res = await axios.put(`http://localhost:5000/api/blogs/${id}`, {
+        title: updatedTitle,
+        content: updatedContent,
       });
-      if (!res.ok) throw new Error("Failed to update blog");
-      const data = await res.json();
       setBlogs((prevBlogs) =>
-        prevBlogs.map((blog) => (blog.id === id ? data : blog))
+        prevBlogs.map((blog) => (blog.id === id ? res.data : blog))
       );
       setEditingBlog(null);
     } catch (err) {
@@ -144,7 +124,7 @@ export default function Home() {
                     editingBlog.content
                   )
                 }
-                className="w-full py-3 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                className="w-full py-3 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
               >
                 Save Changes
               </button>
