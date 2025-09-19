@@ -1,31 +1,37 @@
+require("dotenv").config();  
 const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const blogRoutes = require("./routes/blogRoutes");
 
 const app = express();
+
 const allowedOrigins = [
   "http://localhost:3000",
   "https://blogapp-one-phi.vercel.app",
-  "https://blogapp-unqo.vercel.app"
+  "https://blogapp-unqo.vercel.app",
 ];
 
+// CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
+      // allow requests with no origin like mobile apps or curl
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) !== -1) {
+
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
         return callback(new Error("Not allowed by CORS"), false);
       }
     },
-    credentials: true
+    credentials: true,
   })
 );
 
 app.use(express.json());
 
+// Routes
 app.use("/api/blogs", blogRoutes);
 
 app.get("/api/health", (req, res) => {
@@ -33,16 +39,22 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.status(200).json({ 
-    message: "Blog API Server is running!", 
+  res.status(200).json({
+    message: "Blog API Server is running!",
     endpoints: {
       health: "/api/health",
-      blogs: "/api/blogs"
-    }
+      blogs: "/api/blogs",
+    },
   });
 });
 
+// MongoDB connection
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    console.error("Error: MONGODB_URI is not defined in environment variables");
+    process.exit(1);
+  }
+
   try {
     console.log("Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -50,19 +62,27 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
     console.log("MongoDB Connected Successfully");
+
+    // Start the server only after DB connection is successful
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   } catch (error) {
     console.error("MongoDB Connection Error:", error.message);
+    process.exit(1);
   }
 };
 
 connectDB();
 
+// Mongoose connection event listeners
 mongoose.connection.on("connected", () => {
   console.log("Mongoose connected to DB");
 });
 
 mongoose.connection.on("error", (err) => {
-  console.log("Mongoose connection error:", err);
+  console.error("Mongoose connection error:", err);
 });
 
 mongoose.connection.on("disconnected", () => {
@@ -70,3 +90,4 @@ mongoose.connection.on("disconnected", () => {
 });
 
 module.exports = app;
+
