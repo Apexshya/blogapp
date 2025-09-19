@@ -11,6 +11,8 @@ interface Blog {
   content: string;
 }
 
+const api = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Home() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -20,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs");
+        const res = await axios.get(`${api}/api/blogs`);
         setBlogs(res.data);
       } catch (err) {
         console.error("Error fetching blogs:", err);
@@ -33,7 +35,7 @@ export default function Home() {
   // Create blog
   const handleCreateBlog = async (title: string, content: string) => {
     try {
-      const res = await axios.post("http://localhost:5000/api/blogs", {
+      const res = await axios.post(`${api}/api/blogs`, {
         title,
         content,
       });
@@ -47,7 +49,7 @@ export default function Home() {
   // Delete blog
   const handleDeleteBlog = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:5000/api/blogs/${id}`);
+      await axios.delete(`${api}/api/blogs/${id}`);
       setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id));
     } catch (err) {
       console.error("Error deleting blog:", err);
@@ -61,7 +63,7 @@ export default function Home() {
     updatedContent: string
   ) => {
     try {
-      const res = await axios.put(`http://localhost:5000/api/blogs/${id}`, {
+      const res = await axios.put(`${api}/api/blogs/${id}`, {
         title: updatedTitle,
         content: updatedContent,
       });
