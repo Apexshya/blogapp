@@ -12,7 +12,7 @@ interface Blog {
 }
 
 export default function Home() {
-  const api = process.env.NEXT_PUBLIC_API_URL || "";
+const api = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
