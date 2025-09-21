@@ -1,4 +1,7 @@
+"use client"; 
+
 import { Geist, Geist_Mono } from "next/font/google";
+import AuthProvider from "../context/AuthContext"; 
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,18 +22,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Header */}
-        <header className="bg-gray-800 text-white p-4">
-          <h1 className="text-3xl">My Blog</h1>
-        </header>
-
-        {/* Main Content */}
-        <main>{children}</main>
-
-        {/* Footer */}
-        {/* <footer className="bg-gray-800 text-white text-center py-4">
-          <p>&copy; 2025 My Blog App. All rights reserved.</p>
-        </footer> */}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -6,12 +6,18 @@ interface Blog {
   id: string;
   title: string;
   content: string;
+  author?: {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+  };
 }
 
 interface BlogListProps {
   blogs: Blog[]; 
-  onDelete: (id: string) => void; 
-  onEdit: (id: string, updatedTitle: string, updatedContent: string) => void; 
+  onDelete?: (id: string) => void; 
+  onEdit?: (id: string, updatedTitle: string, updatedContent: string) => void; 
 }
 
 const BlogList: React.FC<BlogListProps> = ({ blogs, onDelete, onEdit }) => {
@@ -30,5 +36,3 @@ const BlogList: React.FC<BlogListProps> = ({ blogs, onDelete, onEdit }) => {
 };
 
 export default BlogList;
-
-

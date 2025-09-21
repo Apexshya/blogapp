@@ -3,8 +3,14 @@ const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const blogRoutes = require("./routes/blogRoutes");
+const authRoutes = require("./routes/authRoutes"); // Add this line
 
 const app = express();
+
+if (!process.env.JWT_SECRET) {
+  console.error("Error: JWT_SECRET is not defined in environment variables");
+  process.exit(1);
+}
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -12,13 +18,10 @@ const allowedOrigins = [
   "https://blogapp-unqo.vercel.app",
 ];
 
-// CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin like mobile apps or curl
       if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
@@ -31,8 +34,8 @@ app.use(
 
 app.use(express.json());
 
-// Routes
 app.use("/api/blogs", blogRoutes);
+app.use("/api/auth", authRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Server is running!" });
@@ -48,7 +51,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// MongoDB connection
 const connectDB = async () => {
   if (!process.env.MONGODB_URI) {
     console.error("Error: MONGODB_URI is not defined in environment variables");
@@ -63,7 +65,6 @@ const connectDB = async () => {
     });
     console.log("MongoDB Connected Successfully");
 
-    // Start the server only after DB connection is successful
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
@@ -76,7 +77,6 @@ const connectDB = async () => {
 
 connectDB();
 
-// Mongoose connection event listeners
 mongoose.connection.on("connected", () => {
   console.log("Mongoose connected to DB");
 });
@@ -90,4 +90,3 @@ mongoose.connection.on("disconnected", () => {
 });
 
 module.exports = app;
-
