@@ -16,9 +16,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     try {
       setError("");
       await login(email, password);
-    } catch (err: any) {
-      setError(err.message);
-    }
+    } catch (err) {
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError("Unknown error occurred.");
+  }
+}
+
   };
 
   return (
@@ -48,8 +53,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
         Login
       </button>
       <p className="mt-4 text-center">
-        Don't have an account?{" "}
-        <button
+  Don&apos;t have an account?{" "}       
+   <button
           type="button"
           onClick={onToggleMode}
           className="text-blue-600 hover:underline"
@@ -62,6 +67,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
 };
 
 export default LoginForm;
+
 
 
 

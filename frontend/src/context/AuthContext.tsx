@@ -12,7 +12,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role?: string) => Promise<void>;  // Updated signature
+  login: (email: string, password: string, role?: string) => Promise<void>;  
   register: (username: string, email: string, password: string, role?: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -69,9 +69,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(data.user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Login failed');
-    }
+    } catch (error) {
+  if (axios.isAxiosError(error)) {
+    throw new Error(error.response?.data?.error || 'Login failed');
+  }
+  throw new Error('Unexpected login error');
+}
+
   };
 
   const register = async (username: string, email: string, password: string, role?: string) => {
@@ -87,9 +91,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser(data.user);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Registration failed');
-    }
+    } catch (error) {
+  if (axios.isAxiosError(error)) {
+    throw new Error(error.response?.data?.error || 'Registration failed');
+  }
+  throw new Error('Unexpected registration error');
+}
+
   };
 
   const logout = () => {

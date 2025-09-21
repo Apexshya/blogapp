@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
@@ -11,7 +10,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("user"); // ✅ NEW STATE
+  const [role, setRole] = useState("user"); 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
@@ -28,13 +27,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleMode }) => {
     }
 
     try {
-      await register(username, email, password, role); // ✅ PASS ROLE
-    } catch (err: any) {
-      console.error("Registration error details:", err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
+      await register(username, email, password, role); 
+    } catch (err) {
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError("Registration failed.");
+  }
+} finally {
+  setIsLoading(false);
+}
+
   };
 
   return (
